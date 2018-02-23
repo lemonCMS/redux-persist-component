@@ -16,7 +16,7 @@ class PersistComponent extends React.Component {
       (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module) => {
         let newState = _get(state, module);
         if (this.lastState[module] !== newState) {
-          this.props.storage.setItem(module, newState);
+          this.props.storage.setItem(module, JSON.stringify(newState));
           this.lastState[module] = JSON.parse(JSON.stringify(newState));
         }
         newState = null;
@@ -28,7 +28,7 @@ class PersistComponent extends React.Component {
         if (item !== null) {
           this.context.store.dispatch({
             type: `@@redux-persist-component/${module}`,
-            result: item
+            result: JSON.parse(item)
           });
         }
       });
