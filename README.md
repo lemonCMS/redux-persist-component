@@ -1,15 +1,15 @@
-#Redux-persist-component
+# Redux-persist-component
 
-##why?
+## why?
 When you are using SSR and client side rendering and would like to restore your redux state, saved on the client computer.
 
 
 
-##How to install
+## How to install
 ```npm install --save @wicked_query/redux-persist-component```
 
-##Usage
-###Storing whith localforage
+## Usage
+### Storing whith localforage
 
 Simply import the module and wrap withing redux store.
 
@@ -40,7 +40,7 @@ import localforage from 'localforage';
 
 ```
 
-##Props
+## Props
 
 ```
 storage: storage enging that resolve a promise, only tested just with localforage
@@ -51,7 +51,7 @@ modules: an array containen the modules to save
 ```
 
 
-##Restoring the state
+## Restoring the state
 When there is a state available to be restored a action will be dispatched.
 
 ```js
