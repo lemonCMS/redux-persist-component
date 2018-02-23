@@ -14,11 +14,12 @@ class PersistComponent extends React.Component {
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
       (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module) => {
-        const newState = _get(state, module);
+        let newState = _get(state, module);
         if (this.lastState[module] !== newState) {
           this.props.storage.setItem(module, newState);
-          this.lastState[module] = newState;
+          this.lastState[module] = JSON.parse(JSON.stringify(newState));
         }
+        newState = null;
       });
     });
 
