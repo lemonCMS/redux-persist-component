@@ -22,7 +22,7 @@ class PersistComponent extends React.Component {
       });
     });
 
-    A(typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module) => {
+    (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module) => {
       this.props.storage.getItem(module).then((item) => {
         if (item !== null) {
           this.context.store.dispatch({
