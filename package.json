@@ -9,6 +9,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Raymond van Vuuren <rsvvuuren@hotmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lemoncms/redux-persist-component"
+  },
+  "homepage": "https://github.com/lemoncms/redux-persist-component",
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.5",
