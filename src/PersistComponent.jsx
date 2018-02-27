@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _get from 'lodash/get';
+import _map from 'lodash/map';
 
 class PersistComponent extends React.Component {
 
@@ -13,7 +14,10 @@ class PersistComponent extends React.Component {
   componentDidMount() {
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
-      (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module, key) => {
+      const modules = (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules);
+
+      _map(modules, (module, key) => {
+        console.log(module, key);
         let newState = _get(state, key);
         if (typeof key === 'string' && typeof module === 'function') {
           const result = module(newState);
