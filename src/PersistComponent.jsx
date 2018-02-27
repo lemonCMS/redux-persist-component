@@ -17,7 +17,6 @@ class PersistComponent extends React.Component {
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
       _map(modules, (module, key) => {
-        console.log(module, typeof module, key, typeof key);
         if (typeof key === 'string' && typeof module === 'function') {
           const newState = _get(state, key);
           const result = module(newState);
