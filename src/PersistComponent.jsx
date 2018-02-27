@@ -12,41 +12,48 @@ class PersistComponent extends React.Component {
   lastState = {};
 
   componentDidMount() {
+    const modules = (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules);
+
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
-      const modules = (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules);
-
-      _map(modules, (key, module) => {
-        console.log(module, key);
-        let newState = _get(state, key);
+      _map(modules, (module, key) => {
+        console.log(module, typeof module, key, typeof key);
         if (typeof key === 'string' && typeof module === 'function') {
+          const newState = _get(state, key);
           const result = module(newState);
           if (this.lastState[key] !== result) {
             this.props.storage.setItem(key, JSON.stringify(result));
             this.lastState[key] = JSON.parse(JSON.stringify(result));
           }
         } else if (typeof key === 'string' && typeof module !== 'function') {
+          const newState = _get(state, key);
           if (this.lastState[key] !== newState) {
             this.props.storage.setItem(key, JSON.stringify(newState));
             this.lastState[key] = JSON.parse(JSON.stringify(newState));
           }
 
         } else {
+          const newState = _get(state, module);
           if (this.lastState[module] !== newState) {
             this.props.storage.setItem(module, JSON.stringify(newState));
             this.lastState[module] = JSON.parse(JSON.stringify(newState));
           }
         }
-
-        newState = null;
       });
     });
 
-    (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules).map((module) => {
-      this.props.storage.getItem(module).then((item) => {
+    _map(modules, (module, key) => {
+      let moduleName;
+      if (typeof key === 'string') {
+        moduleName = key;
+      } else {
+        moduleName = module;
+      }
+
+      this.props.storage.getItem(moduleName).then((item) => {
         if (item !== null) {
           this.context.store.dispatch({
-            type: `@@redux-persist-component/${module}`,
+            type: `@@redux-persist-component/${moduleName}`,
             result: JSON.parse(item)
           });
         }
@@ -61,7 +68,10 @@ class PersistComponent extends React.Component {
 
 PersistComponent.propTypes = {
   children: PropTypes.object.isRequired,
-  modules: PropTypes.array.isRequired,
+  modules: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object
+  ]).isRequired,
   storage: PropTypes.object.isRequired
 };
 PersistComponent.defaultProps = {};
