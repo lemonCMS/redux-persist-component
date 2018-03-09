@@ -19,7 +19,7 @@ class PersistComponent extends React.Component {
       _map(modules, (module, key) => {
         if (typeof key === 'string' && typeof module === 'function') {
           const newState = _get(state, key);
-          const result = module(newState);
+          const result = module(newState, _get(this.lastState, key, null));
           if (this.lastState[key] !== result) {
             this.props.storage.setItem(key, JSON.stringify(result));
             this.lastState[key] = JSON.parse(JSON.stringify(result));
