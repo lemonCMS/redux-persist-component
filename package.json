@@ -1,6 +1,6 @@
 {
   "name": "@wicked_query/redux-persist-component",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Persist redux store for react >=16.0.0",
   "main": "lib/PersistComponent.js",
   "scripts": {
