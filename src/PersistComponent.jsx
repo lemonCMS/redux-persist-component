@@ -5,16 +5,13 @@ import _map from 'lodash/map';
 
 class PersistComponent extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {restored: false};
-  }
-
   static contextTypes = {
     store: PropTypes.object
   };
 
   lastState = {};
+
+  restored = false;
 
   componentDidMount() {
     const modules = (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules);
@@ -22,7 +19,7 @@ class PersistComponent extends React.Component {
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
 
-      if (this.state.restored === true) {
+      if (this.restored === true) {
         _map(modules, (module, key) => {
           if (typeof key === 'string' && typeof module === 'function') {
             const newState = _get(state, key);
@@ -57,17 +54,17 @@ class PersistComponent extends React.Component {
         moduleName = module;
       }
 
-      this.props.storage.getItem(moduleName).then((item) => {
+      const promise = [];
+      promise.push(this.props.storage.getItem(moduleName).then((item) => {
         if (item !== null) {
           this.context.store.dispatch({
             type: `@@redux-persist-component/${moduleName}`,
             result: JSON.parse(item)
           });
         }
-      });
+      }));
+      Promise.all(promise).then(() => { this.restored = true; });
     });
-
-    this.setState({restored: true});
   }
 
   render() {
