@@ -5,6 +5,11 @@ import _map from 'lodash/map';
 
 class PersistComponent extends React.Component {
 
+  constructor() {
+    super();
+    this.state = {restored: false};
+  }
+
   static contextTypes = {
     store: PropTypes.object
   };
@@ -16,29 +21,32 @@ class PersistComponent extends React.Component {
 
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
-      _map(modules, (module, key) => {
-        if (typeof key === 'string' && typeof module === 'function') {
-          const newState = _get(state, key);
-          const result = module(newState, _get(this.lastState, key, null));
-          if (this.lastState[key] !== result) {
-            this.props.storage.setItem(key, JSON.stringify(result));
-            this.lastState[key] = JSON.parse(JSON.stringify(result));
-          }
-        } else if (typeof key === 'string' && typeof module !== 'function') {
-          const newState = _get(state, key);
-          if (this.lastState[key] !== newState) {
-            this.props.storage.setItem(key, JSON.stringify(newState));
-            this.lastState[key] = JSON.parse(JSON.stringify(newState));
-          }
 
-        } else {
-          const newState = _get(state, module);
-          if (this.lastState[module] !== newState) {
-            this.props.storage.setItem(module, JSON.stringify(newState));
-            this.lastState[module] = JSON.parse(JSON.stringify(newState));
+      if (this.state.restored === true) {
+        _map(modules, (module, key) => {
+          if (typeof key === 'string' && typeof module === 'function') {
+            const newState = _get(state, key);
+            const result = module(newState, _get(this.lastState, key, null));
+            if (this.lastState[key] !== result) {
+              this.props.storage.setItem(key, JSON.stringify(result));
+              this.lastState[key] = JSON.parse(JSON.stringify(result));
+            }
+          } else if (typeof key === 'string' && typeof module !== 'function') {
+            const newState = _get(state, key);
+            if (this.lastState[key] !== newState) {
+              this.props.storage.setItem(key, JSON.stringify(newState));
+              this.lastState[key] = JSON.parse(JSON.stringify(newState));
+            }
+
+          } else {
+            const newState = _get(state, module);
+            if (this.lastState[module] !== newState) {
+              this.props.storage.setItem(module, JSON.stringify(newState));
+              this.lastState[module] = JSON.parse(JSON.stringify(newState));
+            }
           }
-        }
-      });
+        });
+      }
     });
 
     _map(modules, (module, key) => {
@@ -58,6 +66,8 @@ class PersistComponent extends React.Component {
         }
       });
     });
+
+    this.setState({restored: true});
   }
 
   render() {
