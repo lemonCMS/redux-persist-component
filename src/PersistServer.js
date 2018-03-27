@@ -11,7 +11,7 @@ export default ({store, storage, modules}) => {
 
       if (item !== null && item !== 'undefined') {
         try {
-          const parsed = JSON.parse(item);
+          const parsed = typeof item === 'string' ? JSON.parse(item) : item;
           store.dispatch({
             type: `@@redux-persist-component/${module}`,
             result: parsed

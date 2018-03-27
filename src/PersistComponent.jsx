@@ -56,10 +56,11 @@ class PersistComponent extends React.Component {
 
       const promise = [];
       promise.push(this.props.storage.getItem(moduleName).then((item) => {
-        if (item !== null) {
+        if (item !== null && item !== 'undefined') {
+          const parsed = typeof item === 'string' ? JSON.parse(item) : item;
           this.context.store.dispatch({
             type: `@@redux-persist-component/${moduleName}`,
-            result: JSON.parse(item)
+            result: parsed
           });
         }
       }));
