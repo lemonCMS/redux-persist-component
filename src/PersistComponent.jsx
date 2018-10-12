@@ -48,7 +48,7 @@ class PersistComponent extends React.Component {
             const result = typeof item === 'string' ? JSON.parse(item) : item;
             const state = this.context.store.getState();
             if (state[key] && JSON.stringify(state[key]) !== item) {
-              module.restore({dispatch: this.context.store.dispatch, result, key})
+              module.restore({dispatch: this.context.store.dispatch, result, currentState: state[key], key})
             }
           } catch (e) {
             console.warning('Json parse failed', e);
