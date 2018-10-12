@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _get from 'lodash/get';
 import _map from 'lodash/map';
+import prepare from './prepare';
 
 class PersistComponent extends React.Component {
 
@@ -13,55 +14,45 @@ class PersistComponent extends React.Component {
 
   restored = false;
 
-  componentDidMount() {
-    const modules = (typeof this.props.modules === 'string' ? [this.props.modules] : this.props.modules);
+  state = {mounted: false};
 
+  constructor() {
+    super();
+    this.append = this.append.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.state.mounted === false) {
+      this.setState({mounted: true}, () => this.append(this.props));
+    }
+  }
+
+  append(props) {
+    const {storage, modules} = props;
+    const preparedModules = prepare(modules);
     this.context.store.subscribe(() => {
       const state = this.context.store.getState();
-
       if (this.restored === true) {
-        _map(modules, (module, key) => {
-          if (typeof key === 'string' && typeof module === 'function') {
-            const newState = _get(state, key);
-            const result = module(newState, _get(this.lastState, key, null));
-            if (this.lastState[key] !== result) {
-              this.props.storage.setItem(key, JSON.stringify(result));
-              this.lastState[key] = JSON.parse(JSON.stringify(result));
-            }
-          } else if (typeof key === 'string' && typeof module !== 'function') {
-            const newState = _get(state, key);
-            if (this.lastState[key] !== newState) {
-              this.props.storage.setItem(key, JSON.stringify(newState));
-              this.lastState[key] = JSON.parse(JSON.stringify(newState));
-            }
-
-          } else {
-            const newState = _get(state, module);
-            if (this.lastState[module] !== newState) {
-              this.props.storage.setItem(module, JSON.stringify(newState));
-              this.lastState[module] = JSON.parse(JSON.stringify(newState));
-            }
-          }
+        _map(preparedModules, (module, key) => {
+          const newState = _get(state, key);
+          this.lastState[key] = module.save(newState, this.lastState[key], storage);
         });
       }
     });
 
-    _map(modules, (module, key) => {
-      let moduleName;
-      if (typeof key === 'string') {
-        moduleName = key;
-      } else {
-        moduleName = module;
-      }
-
+    _map(preparedModules, (module, key) => {
       const promise = [];
-      promise.push(this.props.storage.getItem(moduleName).then((item) => {
+      promise.push(this.props.storage.getItem(key).then((item) => {
         if (item !== null && item !== 'undefined') {
-          const parsed = typeof item === 'string' ? JSON.parse(item) : item;
-          this.context.store.dispatch({
-            type: `@@redux-persist-component/${moduleName}`,
-            result: parsed
-          });
+          try {
+            const result = typeof item === 'string' ? JSON.parse(item) : item;
+            const state = this.context.store.getState();
+            if (state[key] && JSON.stringify(state[key]) !== item) {
+              module.restore({dispatch: this.context.store.dispatch, result, key})
+            }
+          } catch (e) {
+            console.warning('Json parse failed', e);
+          }
         }
       }));
       Promise.all(promise).then(() => { this.restored = true; });
